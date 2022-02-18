@@ -1,182 +1,167 @@
 # go-webapp-sample
 
-[![license](https://img.shields.io/github/license/ybkuroki/go-webapp-sample?style=for-the-badge)](https://github.com/ybkuroki/go-webapp-sample/blob/master/LICENSE)
-[![report](https://goreportcard.com/badge/github.com/ybkuroki/go-webapp-sample?style=for-the-badge)](https://goreportcard.com/report/github.com/ybkuroki/go-webapp-sample)
-[![workflow](https://img.shields.io/github/workflow/status/ybkuroki/go-webapp-sample/check?label=check&style=for-the-badge&logo=github)](https://github.com/ybkuroki/go-webapp-sample/actions?query=workflow%3Acheck)
-[![release](https://img.shields.io/github/release/ybkuroki/go-webapp-sample?style=for-the-badge&logo=github)](https://github.com/ybkuroki/go-webapp-sample/releases)
-
 ## Preface
-This repository is the sample of web application using golang.
-This sample uses [Echo](https://echo.labstack.com/) as web application framework, [Gorm](https://gorm.io/) as OR mapper and [Zap logger](https://pkg.go.dev/go.uber.org/zap) as logger.
-This sample application provides only several functions as Web APIs.
-Please refer to the 'Service' section about the detail of those functions.
 
-Also, this application contains the static contents such as html file, css file and javascript file which built [vuejs-webapp-sample](https://github.com/ybkuroki/vuejs-webapp-sample) project to easily check the behavior of those functions.
-So, you can check this application without starting a web server for front end.
-Please refer to the 'Starting Server' section about checking the behavior of this application.
+Sample go webapp application forked from 
 
-If you would like to develop a web application using golang, please feel free to use this sample.
+This repository is the sample of web application using golang forked from -> -> https://github.com/ybkuroki/go-webapp-sample
 
-## Install
-Perform the following steps:
-1. Download and install [MinGW(gcc)](https://sourceforge.net/projects/mingw-w64/files/?source=navbar).
-1. Download and install [Visual Studio Code(VS Code)](https://code.visualstudio.com/).
-1. Download and install [Golang](https://golang.org/).
-1. Get the source code of this repository by the following command.
-    ```bash
-    go get -u github.com/ybkuroki/go-webapp-sample
-    ```
+On top of that added the below items
+1. Dockerfile to build the docker image and push it to dockerhub
+2. Helm chart to deploy the postgres and redis database which inturn used for webserver.
+3. Helm chart to deploy the web app application without the webserver 
+4. Deploy the letzencrypt ssl with subdomain.
+5. Added the terraform code to deploy the standalone k8s(v19.2.0) in EC2 instance with single master.
 
-## Starting Server
-There are 2 methods for starting server.
 
-### Without Web Server
+
+## Starting Without Web Server locally
 1. Starting this web application by the following command.
     ```bash
     go run main.go
     ```
-1. When startup is complete, the console shows the following message:
+2. When startup is complete, the console shows the following message:
     ```
     http server started on [::]:8080
     ```
-1. Access [http://localhost:8080](http://localhost:8080) in your browser.
-1. Login with the following username and password.
+3. Access [http://localhost:8080](http://localhost:8080) in your browser.
+4. Login with the following username and password.
     - username : ``test``
     - password : ``test``
 
-### With Web Server
-#### Starting Application Server
-1. Starting this web application by the following command.
-    ```bash
-    go run main.go
-    ```
-1. When startup is complete, the console shows the following message:
-    ```
-    http server started on [::]:8080
-    ```
-1. Access [http://localhost:8080/api/health](http://localhost:8080/api/health) in your browser and confirm that this application has started.
-    ```
-    healthy
-    ```
-#### Starting Web Server
-1. Clone [vuejs-webapp-sample](https://github.com/ybkuroki/vuejs-webapp-sample) project and install some tools.
-1. Start by the following command.
-    ```bash
-    npm run serve
-    ```
-1. When startup is complete, the console shows the following message:
-    ```
-    DONE Compiled successfully in *****ms
-    
-    App running at:
-    - Local:   http://localhost:3000/
-    - Network: http://192.168.***.***:3000/
-    
-    Note that the development build is not optimized.
-    To create a production build, run npm run build.
-    ```
-1. Access [http://localhost:3000](http://localhost:3000) in your browser.
-1. Login with the following username and password.
-    - username : ``test``
-    - password : ``test``
-
-## Using Swagger
-In this sample, Swagger is enabled only when executed this application on the development environment.
-Swagger isn't enabled on the another environments in default.
-
-### Accessing to Swagger
-1. Start this application according to the 'Starting Application Server' section.
-2. Access [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) in your browser.
-
-### Updating the existing Swagger document
-1. Update some comments of some controllers.
-2. Download Swag library. (Only first time)
-    ```bash
-    go get github.com/swaggo/swag/cmd/swag
-    ```
-3. Update ``docs/docs.go``.
-    ```bash
-    swag init
-    ```
-
-## Build executable file
-Build this source code by the following command.
-```bash
-go build main.go
-```
-
-## Project Map
-The follwing figure is the map of this sample project.
+### Dockerfile and steps to build postgres
+Below are the steps to build docker image and push to docker hub
+please replace the tagname w.r.t to your docker image
 
 ```
-- go-webapp-sample
-  + config                  … Define configurations of this system.
-  + logger                  … Provide loggers.
-  + middleware              … Define custom middleware.
-  + migration               … Provide database migration service for development.
-  + router                  … Define routing.
-  + controller              … Define controllers.
-  + model                   … Define models.
-  + repository              … Provide a service of database access.
-  + service                 … Provide a service of book management.
-  + session                 … Provide session management.
-  + test                    … for unit test
-  - main.go                 … Entry Point.
+docker build -f DockerfilePostgres . --tag=ahamedyaserarafath/postgres-sample:latest
+docker push ahamedyaserarafath/postgres-sample:latest
 ```
 
-## Services
-This sample provides 3 services: book management, account management, and master management.
-Regarding the detail of the API specification, please refer to the 'Using Swagger' section.
-
-### Book Management
-There are the following services in the book management.
-
-|Service Name|HTTP Method|URL|Parameter|Summary|
-|:---|:---:|:---|:---|:---|
-|Get Service|GET|``/api/books/[BOOK_ID]``|Book ID|Get a book data.|
-|List/Search Service|GET|``/api/books?query=[KEYWORD]&page=[PAGE_NUMBER]&size=[PAGE_SIZE]``|Page, Keyword(Optional)|Get a list of books.|
-|Regist Service|POST|``/api/books``|Book|Regist a book data.|
-|Edit Service|PUT|``/api/books``|Book|Edit a book data.|
-|Delete Service|DELETE|``/api/books``|Book|Delete a book data.|
-
-### Account Management
-There are the following services in the Account management.
-
-|Service Name|HTTP Method|URL|Parameter|Summary|
-|:---|:---:|:---|:---|:---|
-|Login Service|POST|``/api/auth/login``|Session ID, User Name, Password|Session authentication with username and password.|
-|Logout Service|POST|``/api/auth/logout``|Session ID|Logout a user.|
-|Login Status Check Service|GET|``/api/auth/loginStatus``|Session ID|Check if the user is logged in.|
-|Login Username Service|GET|``/api/auth/loginAccount``|Session ID|Get the login user's username.|
-
-### Master Management
-There are the following services in the Master management.
-
-|Service Name|HTTP Method|URL|Parameter|Summary|
-|:---|:---:|:---|:---|:---|
-|Category List Service|GET|``/api/categories``|Nothing|Get a list of categories.|
-|Format List Service|GET|``/api/formats``|Nothing|Get a list of formats.|
-
-## Tests
-Create the unit tests only for the packages such as controller, service, model/dto and util. The test cases is included the regular cases and irregular cases. Please refer to the source code in each packages for more detail.
-
-The command for testing is the following:
-```bash
-go test ./... -v
+Or use the exsisting the docker image
+```
+https://hub.docker.com/repository/docker/ahamedyaserarafath/postgres-sample
 ```
 
-## Libraries
-This sample uses the following libraries.
 
-|Library Name|Version|
-|:---|:---:|
-|echo|4.6.3|
-|gorm|1.22.5|
-|go-playground/validator.v9|9.31.0|
-|zap|1.20.0|
+### Dockerfile and steps to build webapp
 
-## Contribution
-Please read [CONTRIBUTING.md](https://github.com/ybkuroki/go-webapp-sample/blob/master/CONTRIBUTING.md) for proposing new functions, reporting bugs and submitting pull requests before contributing to this repository.
+Below are the steps to build docker image and push to docker hub
+please replace the tagname w.r.t to your docker image
+
+```
+docker build . --tag=ahamedyaserarafath/go-webapp-sample:latest
+docker push ahamedyaserarafath/go-webapp-sample:latest
+```
+
+Or use the exsisting the docker image
+```
+https://hub.docker.com/repository/docker/ahamedyaserarafath/go-webapp-sample
+```
+
+### Steps to deploy EC2 instance with terraform
+
+Prerequisite -> Terraform needs to be installed 
+
+1. Configure the machine with aws access using the below command
+```
+aws configure
+```
+2. Execute the below command to install the EC2 instance
+```
+cd infra/terraform/
+./run.sh
+```
+Note: 
+The above terraform code will create New VPC, EC2 Instance(t2.medium), EC2 SG and Install the k8s with single master 
+SSH key and Kubeconfig will be found in the same folder.
+
+
+### Steps to deploy Helm chart
+
+Prerequisite -> Make sure kubectl is installed on your local machine and configure the kube config on your machine
+Alternative you can login to the EC2 machine which created in the above steps and follow the below steps
+
+1. Install the postgres and redis
+```
+cd infra/helm-charts
+helm install postgres-database ./postgres-database
+helm install redis ./redis
+```
+
+2. Install the go-webapp helm chart using the below command
+
+```
+cd infra/helm-charts
+helm install go-webapp ./go-webapp
+```
+
+3. Confirm that the go webapp Pods have started:
+```
+kubectl get pods -w
+```
+
+4. Setting Up the Kubernetes Nginx Ingress Controller
+```
+cd infra/helm-charts/ingress-nginx/
+kubectl apply -f ingress_controler.yaml
+```
+You should see the following output:
+
+Output
+```
+namespace/ingress-nginx created
+serviceaccount/ingress-nginx created
+configmap/ingress-nginx-controller created
+clusterrole.rbac.authorization.k8s.io/ingress-nginx created
+clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx created
+role.rbac.authorization.k8s.io/ingress-nginx created
+rolebinding.rbac.authorization.k8s.io/ingress-nginx created
+service/ingress-nginx-controller-admission created
+service/ingress-nginx-controller created
+deployment.apps/ingress-nginx-controller created
+validatingwebhookconfiguration.admissionregistration.k8s.io/ingress-nginx-admission created
+clusterrole.rbac.authorization.k8s.io/ingress-nginx-admission created
+clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
+job.batch/ingress-nginx-admission-create created
+job.batch/ingress-nginx-admission-patch created
+role.rbac.authorization.k8s.io/ingress-nginx-admission created
+rolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
+serviceaccount/ingress-nginx-admission created
+```
+Confirm that the Ingress Controller Pods have started:
+```
+kubectl get pods -n ingress-nginx \
+  -l app.kubernetes.io/name=ingress-nginx --watch
+```
+
+5. Setting Up the Kubernetes Nginx Ingress Resource(HTTPS)
+```
+cd infra/helm-charts/ingress-nginx/
+kubectl apply -f https_ingress_letzencrypt.yaml
+```
+
+6. Installing and Configuring Letzencrypt Cert-Manager
+```
+kubectl apply --validate=false -f cert-manager.yaml
+```
+To verify our installation, check the cert-manager Namespace for running pods:
+
+```
+kubectl get pods --namespace cert-manager
+```
+
+You can use kubectl describe to track the state of the Ingress changes you’ve just applied:
+
+```
+kubectl describe ingress
+```
+
+Once the certificate has been successfully created, you can run a describe on it to further confirm its successful creation:
+
+```
+kubectl describe certificate
+```
 
 ## License
 The License of this sample is *MIT License*.

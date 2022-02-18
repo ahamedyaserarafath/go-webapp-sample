@@ -1,6 +1,6 @@
 database:
   dialect: postgres
-  host: dbserver-k8s-service
+  host: go-webapp-postgres
   port: 5432
   dbname: testdb
   username: testusr
@@ -10,13 +10,16 @@ database:
 redis:
   enabled: true
   connection_pool_size: 10
-  host: redis-k8s-service
+  host: go-webapp-redis
   port: 6379
 
 extension:
   master_generator: false
   cors_enabled: false
   security_enabled: true
+
+staticcontents:
+  path: ./public/
 
 log:
   request_log_format: ${remote_ip} ${account_name} ${uri} ${method} ${status}
